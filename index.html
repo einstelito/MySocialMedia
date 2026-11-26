@@ -93,6 +93,39 @@ a.link:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .what { display: block; color: var(--muted); font-size: .875rem; margin-top: 2px; }
 .arrow { flex: none; width: 20px; height: 20px; stroke: var(--muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { a.link { transition: none; } a.link:hover { transform: none; } }
+.jokes { display: grid; gap: 12px; margin-top: 40px; }
+.joke-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 16px; }
+.joke-card h2 { font-family: var(--font-display); font-size: 1.25rem; letter-spacing: -0.01em; margin: 0 0 4px; }
+.joke-date { color: var(--muted); font-size: .8125rem; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 14px; }
+.joke-text { font-size: 1.0625rem; line-height: 1.5; margin: 0 0 16px; text-wrap: pretty; }
+button.more { font: inherit; font-weight: 600; font-size: .9375rem; color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+button.more:hover { border-color: var(--fg); }
+button.more:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+:root {
+  --dad-bg: #dcecfb;
+  --dad-line: #b1d0f0;
+  --mama-bg: #fdf3c4;
+  --mama-line: #ebd887;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --dad-bg: #1d2f45;
+    --dad-line: #345272;
+    --mama-bg: #3b3416;
+    --mama-line: #655829;
+  }
+}
+:root[data-theme="dark"] {
+  --dad-bg: #1d2f45;
+  --dad-line: #345272;
+  --mama-bg: #3b3416;
+  --mama-line: #655829;
+}
+#dad-card { background: var(--dad-bg); border-color: var(--dad-line); }
+#mama-card { background: var(--mama-bg); border-color: var(--mama-line); }
+#dad-card button.more { border-color: var(--dad-line); }
+#mama-card button.more { border-color: var(--mama-line); }
+#dad-card button.more:hover, #mama-card button.more:hover { border-color: var(--fg); }
 </style>
 
 <main>
@@ -128,6 +161,76 @@ a.link:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
       </a>
     </li>
   </ul>
+
+  <div class="jokes">
+    <section class="joke-card" id="dad-card" aria-labelledby="dad-h">
+      <h2 id="dad-h">Dad Daily Jokes</h2>
+      <p class="joke-date" id="dad-date">Today</p>
+      <p class="joke-text" id="dad-text" aria-live="polite">I'm reading a book about anti-gravity. It's impossible to put down.</p>
+      <button class="more" id="dad-more" type="button">Another one</button>
+    </section>
+    <section class="joke-card" id="mama-card" aria-labelledby="mama-h">
+      <h2 id="mama-h">Your Mama Daily Jokes</h2>
+      <p class="joke-date" id="mama-date">Today</p>
+      <p class="joke-text" id="mama-text" aria-live="polite">Your mama is so cool, ice asks her for tips.</p>
+      <button class="more" id="mama-more" type="button">Another one</button>
+    </section>
+  </div>
 </main>
+
+<script>
+(function () {
+  var dad = [
+    "I'm reading a book about anti-gravity. It's impossible to put down.",
+    "Why don't eggs tell jokes? They'd crack each other up.",
+    "I used to hate facial hair, but then it grew on me.",
+    "What do you call a fake noodle? An impasta.",
+    "Why did the scarecrow win an award? He was outstanding in his field.",
+    "I only know 25 letters of the alphabet. I don't know y.",
+    "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
+    "What do you call cheese that isn't yours? Nacho cheese.",
+    "Why can't you trust stairs? They're always up to something.",
+    "I'm afraid for the calendar. Its days are numbered.",
+    "What did the ocean say to the beach? Nothing, it just waved.",
+    "How does a penguin build its house? Igloos it together.",
+    "I'd tell you a construction joke, but I'm still working on it.",
+    "Why did the coffee file a police report? It got mugged."
+  ];
+  var mama = [
+    "Your mama is so cool, ice asks her for tips.",
+    "Your mama is so organized, she alphabetizes her alphabet soup.",
+    "Your mama is so tall, she high-fives airplanes.",
+    "Your mama is so strong, she can bench-press the bench.",
+    "Your mama is so punctual, she arrives early to her own surprise party.",
+    "Your mama is so quiet, even her echo whispers.",
+    "Your mama is so lucky, she wins at rock-paper-scissors against a rock.",
+    "Your mama is so busy, her to-do list has a to-do list.",
+    "Your mama is so bright, sunglasses wear her.",
+    "Your mama is so funny, even her shadow cracks up.",
+    "Your mama is so fast, she finished the marathon before the starting gun.",
+    "Your mama is so generous, she gives out free samples of her free samples.",
+    "Your mama is so tech-savvy, she has 300 tabs open and knows where every one is.",
+    "Your mama is so sweet, dentists send her thank-you cards."
+  ];
+  var now = new Date();
+  var day = Math.floor((now.getTime() - now.getTimezoneOffset() * 60000) / 86400000);
+  var label = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  function setup(list, prefix, offset) {
+    var i = (day + offset) % list.length;
+    var text = document.getElementById(prefix + '-text');
+    var date = document.getElementById(prefix + '-date');
+    var btn = document.getElementById(prefix + '-more');
+    text.textContent = list[i];
+    date.textContent = 'Joke of the day · ' + label;
+    btn.addEventListener('click', function () {
+      i = (i + 1) % list.length;
+      text.textContent = list[i];
+      date.textContent = 'Another one';
+    });
+  }
+  setup(dad, 'dad', 0);
+  setup(mama, 'mama', 3);
+})();
+</script>
 
 </body></html>
